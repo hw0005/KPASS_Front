@@ -1,0 +1,291 @@
+/* ==========================================
+   K-PASS 통합 인증 스타일 (Auth Container / Login / Register)
+   ========================================== */
+
+/* 전체 화면 중앙 정렬 레이아웃 */
+.auth-viewport {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f1015 0%, #1a1c24 100%);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 카드 컨테이너 */
+.auth-card-container {
+    width: 100%;
+    max-width: 440px;
+    background-color: #161820;
+    border: 1px solid #2a2d3d;
+    border-radius: 16px;
+    padding: 32px 28px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+}
+
+/* 탭 토글 스위치 바 */
+.auth-toggle-bar {
+    position: relative;
+    display: flex;
+    background-color: #0b0c10;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+    border: 1px solid #222533;
+}
+
+.auth-toggle-slider {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: calc(50% - 4px);
+    background-color: #6c5ce7;
+    border-radius: 8px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-toggle-slider.slide-left {
+    transform: translateX(0);
+}
+
+.auth-toggle-slider.slide-right {
+    transform: translateX(100%);
+}
+
+.toggle-btn {
+    flex: 1;
+    z-index: 1;
+    background: none;
+    border: none;
+    color: #8c92a4;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.toggle-btn.active {
+    color: #ffffff;
+}
+
+/* 타이틀 영역 */
+.auth-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    text-align: center;
+    color: #ffffff;
+}
+
+.auth-subtitle {
+    font-size: 0.88rem;
+    color: #8c92a4;
+    margin: 0 0 24px 0;
+    text-align: center;
+}
+
+/* 폼 입력 그룹 */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 18px;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #cccccc;
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 14px;
+    background-color: #0f1015;
+    border: 1px solid #2f3448;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #6c5ce7;
+    background-color: #13151d;
+}
+
+.input-group input::placeholder {
+    color: #52586a;
+}
+
+/* 필드 하단 에러 span 뱃지 */
+.field-error-span {
+    display: inline-block;
+    color: #ff3355;
+    background-color: rgba(255, 51, 85, 0.12);
+    border: 1px solid rgba(255, 51, 85, 0.35);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    letter-spacing: -0.3px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.input-error {
+    border: 1px solid #ff3355 !important;
+    background-color: rgba(255, 51, 85, 0.05) !important;
+}
+
+.input-error:focus {
+    box-shadow: 0 0 0 2px rgba(255, 51, 85, 0.2) !important;
+}
+
+/* 상단 전체 에러 박스 */
+.auth-error-box {
+    background-color: rgba(255, 51, 85, 0.12);
+    border: 1px solid #ff3355;
+    color: #ff3355;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* 메인 로그인/회원가입 버튼 */
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.primary-btn {
+    background-color: #6c5ce7;
+    color: #ffffff;
+}
+
+.primary-btn:hover {
+    background-color: #5b4bc4;
+}
+
+.primary-btn:active {
+    transform: scale(0.99);
+}
+
+/* OAuth2 구분선 */
+.oauth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 24px 0 18px 0;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #2f3448;
+}
+
+.oauth-divider span {
+    padding: 0 10px;
+    color: #6c7385;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* 소셜 버튼 그룹 */
+.social-login-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.social-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.social-btn:hover {
+    opacity: 0.9;
+}
+
+.social-btn:active {
+    transform: scale(0.99);
+}
+
+.btn-kakao {
+    background-color: #FEE500;
+    color: #191919;
+}
+
+.btn-naver {
+    background-color: #03C75A;
+    color: #ffffff;
+}
+
+.btn-google {
+    background-color: #ffffff;
+    color: #1f1f1f;
+    border: 1px solid #e0e0e0;
+}
+
+/* 하단 전환 링크 */
+.switch-text {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: #8c92a4;
+    text-align: center;
+}
+
+.link-span {
+    color: #a29bfe;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: 4px;
+}
+
+.link-span:hover {
+    color: #6c5ce7;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

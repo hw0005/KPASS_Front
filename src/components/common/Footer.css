@@ -1,0 +1,50 @@
+.kpass-footer {
+    background-color: #0b0c10;
+    border-top: 1px solid #1f222e;
+    padding: 24px 32px;
+    margin-top: auto;
+}
+
+.footer-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.footer-brand {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #6c5ce7;
+    margin: 0;
+}
+
+.footer-copyright {
+    font-size: 0.8rem;
+    color: #52586a;
+    margin: 0;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: #8c92a4;
+}
+
+.footer-links span {
+    cursor: pointer;
+}
+
+.footer-links span:hover {
+    color: #ffffff;
+}
+
+.footer-links .divider {
+    color: #2a2d3d;
+    cursor: default;
+}

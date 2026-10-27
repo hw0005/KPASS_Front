@@ -1,38 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import axiosClient from '../../api/axiosClient';
+import React from 'react';
+import Header from '../../components/common/Header';
+import Footer from '../../components/common/Footer';
+import './MainPage.css';
 
 const MainPage = () => {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        axiosClient.get('/api/test')
-            .then((res) => {
-                setData(res);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error(err);
-                setLoading(false);
-            });
-    }, []);
-
     return (
-        <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto' }}>
-            <h1>🚀 K-Pass AI Platform</h1>
-            <p style={{ color: '#666', marginTop: '8px' }}>Vite React + Spring Boot 3 계층 연동 완료</p>
-            <hr style={{ margin: '20px 0' }} />
+        <div className="main-layout">
+            <Header nickname="회원" />
 
-            <h3>백엔드 (포트 8080) 응답 결과:</h3>
-            {loading ? (
-                <p>백엔드 서버 연동 중...</p>
-            ) : data ? (
-                <pre style={{ background: '#e9ecef', padding: '15px', borderRadius: '6px', marginTop: '10px' }}>
-                    {JSON.stringify(data, null, 2)}
-                </pre>
-            ) : (
-                <p style={{ color: 'red', marginTop: '10px' }}>⚠️ 백엔드 서버가 꺼져 있거나 연결할 수 없습니다.</p>
-            )}
+            <main className="main-content">
+                <section className="welcome-banner">
+                    <h2>🎫 K-PASS 메인 화면</h2>
+                    <p>인증 성공! 고성능 K-POP 티켓팅 서비스에 오신 것을 환영합니다.</p>
+                </section>
+
+                <section className="concert-section">
+                    <h3>🔥 진행 중인 티켓팅 일정</h3>
+                    <div className="concert-grid">
+                        <div className="concert-card">
+                            <span className="badge open">OPEN</span>
+                            <h4>2026 K-POP 월드 투어</h4>
+                            <p>장소: 서울 올림픽주경기장</p>
+                            <p className="date">일시: 2026.11.15 19:00</p>
+                            <button type="button" className="ticket-btn">
+                                예매하기
+                            </button>
+                        </div>
+
+                        <div className="concert-card">
+                            <span className="badge upcoming">UPCOMING</span>
+                            <h4>K-PASS 앙코르 콘서트</h4>
+                            <p>장소: 고척스카이돔</p>
+                            <p className="date">일시: 2026.12.01 18:00</p>
+                            <button type="button" className="ticket-btn disabled" disabled>
+                                오픈 대기
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <Footer />
         </div>
     );
 };

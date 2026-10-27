@@ -1,17 +1,23 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import AuthContainerPage from '../pages/auth/AuthContainerPage';
 import MainPage from '../pages/main/MainPage';
 
 const AppRouter = () => {
     return (
-    <BrowserRouter>
-        <Routes>
-        <Route path="/" element={<MainPage />} />
-        {/* 추후 추가될 도메인 라우트 위치 */}
-        {/* <Route path="/login" element={<LoginPage />} /> */}
-        {/* <Route path="/performance" element={<PerformancePage />} /> */}
-        </Routes>
-    </BrowserRouter>
+        <BrowserRouter>
+            <Routes>
+                {/* 루트 접속 시 로그인 화면으로 리다이렉트 */}
+                <Route path="/" element={<Navigate to="/kpass/login" replace />} />
+                
+                {/* 인증 관련 라우트 */}
+                <Route path="/kpass/login" element={<AuthContainerPage mode="login" />} />
+                <Route path="/kpass/register" element={<AuthContainerPage mode="register" />} />
+                
+                {/* 메인 화면 라우트 */}
+                <Route path="/kpass/main" element={<MainPage />} />
+            </Routes>
+        </BrowserRouter>
     );
 };
 

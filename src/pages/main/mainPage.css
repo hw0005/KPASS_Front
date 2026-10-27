@@ -1,0 +1,116 @@
+.main-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #0f1015;
+    color: #ffffff;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+.main-content {
+    flex: 1;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.welcome-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    border: 1px solid #4338ca;
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 36px;
+}
+
+.welcome-banner h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+}
+
+.welcome-banner p {
+    margin: 0;
+    color: #a5b4fc;
+    font-size: 0.95rem;
+}
+
+.concert-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 18px;
+}
+
+.concert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.concert-card {
+    background-color: #161820;
+    border: 1px solid #2a2d3d;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.badge {
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.badge.open {
+    background-color: rgba(255, 51, 85, 0.15);
+    color: #ff3355;
+    border: 1px solid rgba(255, 51, 85, 0.4);
+}
+
+.badge.upcoming {
+    background-color: rgba(140, 146, 164, 0.15);
+    color: #8c92a4;
+    border: 1px solid rgba(140, 146, 164, 0.4);
+}
+
+.concert-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+}
+
+.concert-card p {
+    color: #8c92a4;
+    font-size: 0.85rem;
+    margin: 2px 0;
+}
+
+.concert-card .date {
+    color: #cccccc;
+    margin-bottom: 16px;
+}
+
+.ticket-btn {
+    margin-top: auto;
+    width: 100%;
+    background-color: #6c5ce7;
+    color: #ffffff;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.ticket-btn:hover {
+    background-color: #5b4bc4;
+}
+
+.ticket-btn.disabled {
+    background-color: #2a2d3d;
+    color: #6c7385;
+    cursor: not-allowed;
+}   
