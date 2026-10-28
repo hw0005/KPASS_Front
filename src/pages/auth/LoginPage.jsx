@@ -58,10 +58,45 @@ const LoginPage = ({ onSwitchToRegister }) => {
     };
 
     // 스프링 Security OAuth2 인증 엔드포인트로 리다이렉트
-    const handleOAuthLogin = (provider) => {
-        const backendBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8081';
-        window.location.href = `${backendBaseUrl}/oauth2/authorization/${provider}`;
+    // const handleOAuthLogin = (provider) => {
+    //     const backendBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8081';
+    //     window.location.href = `${backendBaseUrl}/oauth2/authorization/${provider}`;
+    // };
+
+    // 카카오 로그인
+    const handleKakaoLogin = () => {
+        // 프론트엔드 카카오 로그인 버튼 클릭 핸들러
+        const KAKAO_REST_API_KEY = "e9a0bdb04db0e49033e7594b30eb22e3";
+        const REDIRECT_URI = "http://localhost:3000/oauth/callback/kakao";
+
+        // prompt=login 을 추가하면 기존 세션을 무시하고 무조건 로그인/동의창 노출
+        const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_REST_API_KEY}&redirect_uri=${REDIRECT_URI}&response_type=code&prompt=login`;
+
+        window.location.href = kakaoAuthUrl;
     };
+
+    // 네이버 로그인
+    const handleNaverLogin = () => {
+        const NAVER_CLIENT_ID = "QW0kcm4NVmTF3LrHKT7x";
+        const REDIRECT_URI = encodeURIComponent("http://localhost:3000/oauth/callback/naver");
+        const STATE = "naver_login_state"; // 네이버 필수 파라미터
+
+        const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NAVER_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&state=${STATE}`;
+
+        window.location.href = naverAuthUrl;
+    };
+
+    // 구글 로그인
+    const handleGoogleLogin = () => {
+    const GOOGLE_CLIENT_ID = "425649387610-17lmlailht74579kds55fiuri1plkd08.apps.googleusercontent.com";
+    const REDIRECT_URI = "http://localhost:3000/oauth/callback/google";
+    const SCOPE = "email profile";
+
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${encodeURIComponent(SCOPE)}&prompt=select_account`;
+
+    window.location.href = googleAuthUrl;
+    };
+
 
     return (
         <div className="auth-form-content fade-in">
@@ -121,22 +156,22 @@ const LoginPage = ({ onSwitchToRegister }) => {
             <div className="social-login-group">
                 <button
                     type="button"
-                    className="social-btn btn-kakao"
-                    onClick={() => handleOAuthLogin('kakao')}
-                >
-                    카카오 로그인
-                </button>
-                <button
-                    type="button"
                     className="social-btn btn-naver"
-                    onClick={() => handleOAuthLogin('naver')}
+                    onClick={() => handleNaverLogin('naver')}
                 >
                     네이버 로그인
                 </button>
                 <button
                     type="button"
+                    className="social-btn btn-kakao"
+                    onClick={() => handleKakaoLogin('kakao')}
+                >
+                    카카오 로그인
+                </button>
+                <button
+                    type="button"
                     className="social-btn btn-google"
-                    onClick={() => handleOAuthLogin('google')}
+                    onClick={() => handleGoogleLogin('google')}
                 >
                     Google 로그인
                 </button>

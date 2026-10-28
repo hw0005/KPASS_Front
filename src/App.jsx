@@ -2,6 +2,9 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthContainerPage from './pages/auth/AuthContainerPage';
 import MainPage from './pages/main/MainPage';
+import KakaoCallbackPage from './pages/auth/KakaoCallbackPage';
+import NaverCallbackPage from './pages/auth/NaverCallbackPage';
+import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 
 function App() {
     return (
@@ -13,6 +16,14 @@ function App() {
                 {/* URL 경로별 페이지 매핑 */}
                 <Route path="/kpass/login" element={<AuthContainerPage mode="login" />} />
                 <Route path="/kpass/register" element={<AuthContainerPage mode="register" />} />
+
+                {/* 카카오 OAuth 콜백 라우트 */}
+                <Route path="/oauth/callback/kakao" element={<KakaoCallbackPage />} />
+                {/* 네이버 OAuth 콜백 라우트 */}
+                <Route path="/oauth/callback/naver" element={<NaverCallbackPage />} />
+                {/* 구글 OAuth 콜백 라우트 */}
+                <Route path="/oauth/callback/google" element={<GoogleCallbackPage />} />
+
 
                 {/* 메인 페이지 라우트 */}
                 <Route path="/kpass/main" element={<MainPage />} />
