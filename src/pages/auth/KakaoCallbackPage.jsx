@@ -13,11 +13,15 @@ export default function KakaoCallbackPage() {
     useEffect(() => {
         const code = searchParams.get('code');
 
+        
         if (code) {
             socialLoginApi('kakao', code)
                 .then((res) => {
                     if (res && res.isRegistered) {
                         localStorage.setItem('accessToken', res.accessToken);
+                        localStorage.setItem('nickname', res.nickname); 
+
+                        alert(`${res.nickname}님 환영합니다!`);
                         navigate('/kpass/main', { replace: true });
                     } else if (res && res.isRegistered === false) {
                         setSocialData(res);

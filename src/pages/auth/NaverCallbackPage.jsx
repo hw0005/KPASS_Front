@@ -12,13 +12,16 @@ export default function NaverCallbackPage() {
 
     useEffect(() => {
         const code = searchParams.get('code');
-
+        
         if (code) {
             // provider를 'naver'로 전달
             socialLoginApi('naver', code)
                 .then((res) => {
                     if (res && res.isRegistered) {
                         localStorage.setItem('accessToken', res.accessToken);
+                        localStorage.setItem('nickname', res.nickname); 
+
+                        alert(`${res.nickname}님 환영합니다!`);
                         navigate('/kpass/main', { replace: true });
                     } else if (res && res.isRegistered === false) {
                         setSocialData(res);
