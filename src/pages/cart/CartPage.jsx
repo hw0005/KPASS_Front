@@ -17,8 +17,8 @@ export default function CartPage() {
         try {
             localStorage.removeItem('kpass_cart');
 
-            const list = await cartApi.getMyCart();
-            setCartItems(list.map((item) => ({ ...item, checked: true })));
+            const res = await cartApi.getMyCart(); // ← 위쪽 변수명도 반드시 res로 통일
+            setCartItems(Array.isArray(res.data) ? res.data : []);
         } catch (error) {
             console.error('장바구니 조회 실패:', error);
             setCartItems([]);

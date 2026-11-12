@@ -1,20 +1,34 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import axiosClient from '../../api/axiosClient';
 
 export default function Header() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // ⭕ 로그인 시 저장된 닉네임 가져오기 (만약의 경우를 대비해 '회원' 기본값 지정)
     const nickname = localStorage.getItem('nickname') || sessionStorage.getItem('nickname') || '회원';
 
-    const handleLogout = () => {
-        localStorage.removeItem('nickname');
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('nickname');
-        sessionStorage.removeItem('token');
-        alert('로그아웃되었습니다.');
-        navigate('/kpass/login');
+    const handleLogout = async () => {
+        try {
+            // 백엔드 Redis에서 Refresh Token 삭제 및 Access Token 블랙리스트 등록
+            await axiosClient.post('/api/v1/auth/logout');
+        } catch (error) {
+            console.error('로그아웃 API 호출 실패:', error);
+        } finally {
+            // 브라우저 저장소 초기화
+            localStorage.removeItem('nickname');
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('token');
+
+            sessionStorage.removeItem('nickname');
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('refreshToken');
+            sessionStorage.removeItem('token');
+
+            alert('로그아웃되었습니다.');
+            navigate('/kpass/login');
+        }
     };
 
     return (
@@ -68,7 +82,7 @@ export default function Header() {
                     </button>
                 </nav>
 
-                {/* 3. 회원 전용 영역 (닉네임 + 로그아웃 버튼 고정) */}
+                {/* 3. 회원 전용 영역 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <span style={{ fontSize: '0.9rem', color: '#ffffff' }}>
                         <strong style={{ color: '#818cf8' }}>{nickname}</strong>님 환영합니다!

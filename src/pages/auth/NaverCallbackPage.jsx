@@ -57,6 +57,7 @@ export default function NaverCallbackPage() {
             if (res && res.accessToken) {
                 alert("회원가입이 완료되었습니다!");
                 localStorage.setItem('accessToken', res.accessToken);
+                localStorage.setItem('nickname', res.nickname);
                 navigate('/kpass/main', { replace: true });
             }
         } catch (error) {
