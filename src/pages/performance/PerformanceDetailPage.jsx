@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
+import { cartApi } from '../cart/CartApi';
 
 const DEFAULT_POSTER = 'https://via.placeholder.com/300x400/1c1e28/8c92a4?text=K-PASS';
 
@@ -9,138 +10,242 @@ export default function PerformanceDetailPage() {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const item = location.state?.performance;
-    const currentNickname = localStorage.getItem('nickname') || sessionStorage.getItem('nickname') || '익명유저';
+    const performance = location.state?.performance;
+    const userNickname = localStorage.getItem('nickname') || localStorage.getItem('userName') || '회원';
 
-    const [isLiked, setIsLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(item?.likeCount || 0);
+    const [liked, setLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(performance?.likeCount || 0);
+    const [submitting, setSubmitting] = useState(false);
 
+    const [commentInput, setCommentInput] = useState('');
     const [comments, setComments] = useState([
-        { id: 1, author: '티켓매니아', content: '라인업과 좌석 가격 정보 확인했습니다.', createdAt: '2026-03-24' }
-    ]);
-    const [newComment, setNewComment] = useState('');
-
-    useEffect(() => {
-        if (!item) {
-            alert('잘못된 접근이거나 선택된 공연 정보가 없습니다.');
-            navigate('/kpass/search', { replace: true });
+        {
+            id: 1,
+            author: '티켓매니아',
+            date: '2026-03-24',
+            content: '라인업과 좌석 가격 정보 확인했습니다.'
         }
-    }, [item, navigate]);
+    ]);
 
-    if (!item) return null;
+    if (!performance) {
+        return (
+            <div style={{ backgroundColor: '#0d0e12', minHeight: '100vh', display: 'flex', flexDirection: 'column', color: '#ffffff' }}>
+                <Header />
+                <main style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', gap: '16px' }}>
+                    <p style={{ color: '#a1a1aa', fontSize: '1.1rem' }}>공연 정보를 불러올 수 없습니다.</p>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/kpass/search')}
+                        style={{ padding: '12px 24px', backgroundColor: '#ff3355', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                        검색 목록으로 돌아가기
+                    </button>
+                </main>
+                <Footer />
+            </div>
+        );
+    }
 
-    const handleToggleLike = () => {
-        setIsLiked(!isLiked);
-        setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
-        // 백엔드 좋아요 증감 API 호출 위치
+    const today = new Date().toISOString().split('T')[0];
+    const isClosed =
+        (performance.endDate && performance.endDate < today) ||
+        (performance.stockQuantity !== undefined && performance.stockQuantity <= 0);
+
+    const handleLikeToggle = () => {
+        if (liked) {
+            setLiked(false);
+            setLikeCount((prev) => Math.max(0, prev - 1));
+        } else {
+            setLiked(true);
+            setLikeCount((prev) => prev + 1);
+        }
     };
 
-    const handleAddComment = (e) => {
+    const handleCommentSubmit = (e) => {
         e.preventDefault();
-        if (!newComment.trim()) return;
+        if (!commentInput.trim()) return;
 
-        const commentObj = {
-            id: Date.now(),
-            author: currentNickname,
-            content: newComment,
-            createdAt: new Date().toISOString().split('T')[0]
-        };
-
-        setComments([commentObj, ...comments]);
-        setNewComment('');
-        // 백엔드 댓글 등록 API 호출 위치
+        setComments([
+            {
+                id: Date.now(),
+                author: userNickname,
+                date: new Date().toISOString().split('T')[0],
+                content: commentInput.trim()
+            },
+            ...comments
+        ]);
+        setCommentInput('');
     };
 
-    const handleGoCheckout = () => {
-        navigate('/kpass/checkout', { state: { performance: item } });
+    // DB 장바구니 담기
+    const handleAddToCart = async () => {
+        if (isClosed || submitting) return;
+        setSubmitting(true);
+        try {
+            await cartApi.addToCart(performance, 1);
+            if (window.confirm('장바구니에 공연이 담겼습니다. 장바구니 페이지로 이동하시겠습니까?')) {
+                navigate('/kpass/cart');
+            }
+        } catch (error) {
+            console.error('장바구니 담기 실패:', error);
+            alert(error.response?.data?.message || '로그인이 필요하거나 장바구니 담기에 실패했습니다.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // 예매하기 (DB 장바구니에 담고 바로 이동)
+    const handleReserve = async () => {
+        if (isClosed || submitting) return;
+        setSubmitting(true);
+        try {
+            await cartApi.addToCart(performance, 1);
+            navigate('/kpass/cart');
+        } catch (error) {
+            console.error('예매 이동 실패:', error);
+            alert(error.response?.data?.message || '로그인이 필요한 서비스입니다.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
         <div style={{ backgroundColor: '#0d0e12', minHeight: '100vh', display: 'flex', flexDirection: 'column', color: '#ffffff' }}>
             <Header />
 
-            <main style={{ flex: 1, maxWidth: '1000px', width: '100%', margin: '0 auto', padding: '40px 20px 80px 20px', boxSizing: 'border-box' }}>
-                <div style={{
-                    display: 'flex', gap: '32px', backgroundColor: '#161820',
-                    border: '1px solid #2a2d3d', borderRadius: '12px', padding: '28px',
-                    alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '32px'
-                }}>
-                    <img
-                        src={item.posterUrl || DEFAULT_POSTER}
-                        alt={item.title}
-                        style={{ width: '220px', height: '300px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }}
-                        onError={(e) => { e.target.src = DEFAULT_POSTER; }}
-                    />
-
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px', minWidth: '280px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{
-                                fontSize: '0.8rem', color: '#818cf8', fontWeight: 'bold',
-                                backgroundColor: '#232636', padding: '4px 10px', borderRadius: '4px'
-                            }}>
-                                {item.category} | {item.region}
+            <main style={{ flex: 1, maxWidth: '960px', width: '100%', margin: '0 auto', padding: '40px 20px 80px 20px', boxSizing: 'border-box' }}>
+                <div style={{ backgroundColor: '#161820', border: '1px solid #2a2d3d', borderRadius: '14px', padding: '28px', display: 'flex', gap: '32px', flexWrap: 'wrap', marginBottom: '28px' }}>
+                    <div style={{ width: '240px', height: '330px', flexShrink: 0, position: 'relative' }}>
+                        <img
+                            src={performance.posterUrl || DEFAULT_POSTER}
+                            alt={performance.title}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px', filter: isClosed ? 'brightness(0.6)' : 'none' }}
+                            onError={(e) => { e.target.src = DEFAULT_POSTER; }}
+                        />
+                        {isClosed && (
+                            <span style={{ position: 'absolute', top: '10px', left: '10px', backgroundColor: 'rgba(0, 0, 0, 0.8)', color: '#a1a1aa', border: '1px solid #4b5563', padding: '4px 10px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                                마감
                             </span>
+                        )}
+                    </div>
 
-                            <button
-                                type="button"
-                                onClick={handleToggleLike}
-                                style={{
-                                    backgroundColor: isLiked ? 'rgba(255, 51, 85, 0.2)' : '#2a2d3d',
-                                    border: isLiked ? '1px solid #ff3355' : '1px solid #3f435a',
-                                    color: isLiked ? '#ff3355' : '#a1a1aa',
-                                    borderRadius: '20px', padding: '6px 14px', fontSize: '0.85rem',
-                                    fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
-                                }}
-                            >
-                                {isLiked ? '❤️' : '🤍'} {likeCount}
-                            </button>
+                    <div style={{ flex: 1, minWidth: '280px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                <span style={{ backgroundColor: '#1e2130', color: '#818cf8', padding: '5px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                    {performance.category || '공연'} | {performance.region || '전국'}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={handleLikeToggle}
+                                    style={{
+                                        backgroundColor: liked ? 'rgba(255, 51, 85, 0.15)' : '#1e2130',
+                                        color: liked ? '#ff3355' : '#a1a1aa',
+                                        border: `1px solid ${liked ? '#ff3355' : '#2a2d3d'}`,
+                                        borderRadius: '20px',
+                                        padding: '6px 14px',
+                                        fontSize: '0.88rem',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <span>{liked ? '♥' : '♡'}</span>
+                                    <span>{likeCount}</span>
+                                </button>
+                            </div>
+
+                            <h1 style={{ fontSize: '1.55rem', fontWeight: 'bold', margin: '0 0 18px 0', lineHeight: '1.4', color: '#ffffff' }}>
+                                {performance.title}
+                            </h1>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.92rem', color: '#a1a1aa' }}>
+                                <p style={{ margin: 0 }}>📍 <strong style={{ color: '#d4d4d8' }}>장소:</strong> {performance.venue || '장소 정보 없음'}</p>
+                                <p style={{ margin: 0 }}>📅 <strong style={{ color: '#d4d4d8' }}>기간:</strong> {performance.startDate || '-'} ~ {performance.endDate || '-'}</p>
+                                <p style={{ margin: 0 }}>
+                                    💰 <strong style={{ color: '#d4d4d8' }}>가격:</strong>{' '}
+                                    <span style={{ color: isClosed ? '#71717a' : '#ff3355', fontWeight: 'bold' }}>
+                                        {performance.price && performance.price > 0 ? `${performance.price.toLocaleString()}원` : '무료'}
+                                    </span>
+                                </p>
+                            </div>
                         </div>
 
-                        <h1 style={{ fontSize: '1.6rem', margin: 0, color: '#ffffff', fontWeight: 'bold', lineHeight: 1.3 }}>
-                            {item.title}
-                        </h1>
-
-                        <div style={{ borderTop: '1px solid #2a2d3d', borderBottom: '1px solid #2a2d3d', padding: '16px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            <p style={{ margin: 0, color: '#d4d4d8', fontSize: '0.92rem' }}>📍 <strong>장소:</strong> {item.venue} ({item.address || '주소 정보 없음'})</p>
-                            <p style={{ margin: 0, color: '#d4d4d8', fontSize: '0.92rem' }}>📅 <strong>기간:</strong> {item.startDate} ~ {item.endDate}</p>
-                            <p style={{ margin: 0, color: '#d4d4d8', fontSize: '0.92rem' }}>👁️ <strong>조회수:</strong> {item.viewCount}</p>
-
-                            {/* seatPrices 엔티티 리스트 표시 */}
-                            {item.seatPrices && item.seatPrices.length > 0 && (
-                                <div style={{ marginTop: '8px' }}>
-                                    <strong style={{ color: '#d4d4d8', fontSize: '0.92rem' }}>🪑 좌석별 가격:</strong>
-                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
-                                        {item.seatPrices.map((sp) => (
-                                            <span key={sp.id || sp.seatType} style={{ backgroundColor: '#232636', color: '#a1a1aa', fontSize: '0.8rem', padding: '4px 8px', borderRadius: '4px' }}>
-                                                {sp.seatType}: <strong style={{ color: '#ff3355' }}>{sp.price?.toLocaleString()}원</strong>
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '28px' }}>
+                            {isClosed ? (
+                                <button
+                                    type="button"
+                                    disabled
+                                    style={{
+                                        flex: 1,
+                                        padding: '15px 20px',
+                                        backgroundColor: '#252834',
+                                        color: '#71717a',
+                                        border: '1px solid #323646',
+                                        borderRadius: '8px',
+                                        fontSize: '1rem',
+                                        fontWeight: 'bold',
+                                        cursor: 'not-allowed'
+                                    }}
+                                >
+                                    마감됐습니다
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        disabled={submitting}
+                                        onClick={handleReserve}
+                                        style={{
+                                            flex: 2,
+                                            padding: '15px 20px',
+                                            background: 'linear-gradient(135deg, #ff3355 0%, #ff007a 100%)',
+                                            color: '#ffffff',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            fontSize: '1rem',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        예매하기
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={submitting}
+                                        onClick={handleAddToCart}
+                                        style={{
+                                            flex: 1,
+                                            padding: '15px 16px',
+                                            backgroundColor: '#1e2130',
+                                            color: '#818cf8',
+                                            border: '1px solid #3b4269',
+                                            borderRadius: '8px',
+                                            fontSize: '0.95rem',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        🛒 장바구니 담기
+                                    </button>
+                                </>
                             )}
-                        </div>
 
-                        <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                            <button
-                                type="button"
-                                onClick={handleGoCheckout}
-                                style={{
-                                    flex: 1, padding: '14px 0',
-                                    background: 'linear-gradient(135deg, #ff3355 0%, #ff007a 100%)',
-                                    color: '#ffffff', border: 'none', borderRadius: '8px',
-                                    fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer',
-                                    boxShadow: '0 4px 12px rgba(255, 51, 85, 0.4)'
-                                }}
-                            >
-                                예매하기
-                            </button>
                             <button
                                 type="button"
                                 onClick={() => navigate(-1)}
                                 style={{
-                                    padding: '14px 24px', backgroundColor: '#2a2d3d',
-                                    color: '#ffffff', border: 'none', borderRadius: '8px',
-                                    fontSize: '0.9rem', fontWeight: 'bold', cursor: 'pointer'
+                                    padding: '15px 22px',
+                                    backgroundColor: '#222530',
+                                    color: '#d4d4d8',
+                                    border: '1px solid #2a2d3d',
+                                    borderRadius: '8px',
+                                    fontSize: '0.95rem',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
                                 }}
                             >
                                 목록으로
@@ -149,45 +254,57 @@ export default function PerformanceDetailPage() {
                     </div>
                 </div>
 
-                <section style={{ backgroundColor: '#161820', border: '1px solid #2a2d3d', borderRadius: '12px', padding: '28px' }}>
-                    <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        💬 공연 후기 및 관람평 <span style={{ color: '#ff3355', fontSize: '1rem' }}>({comments.length})</span>
+                {/* 공연 후기 및 관람평 */}
+                <div style={{ backgroundColor: '#161820', border: '1px solid #2a2d3d', borderRadius: '14px', padding: '28px' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', margin: '0 0 18px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        💬 공연 후기 및 관람평 <span style={{ color: '#ff3355' }}>({comments.length})</span>
                     </h3>
 
-                    <form onSubmit={handleAddComment} style={{ display: 'flex', gap: '12px', marginBottom: '28px' }}>
+                    <form onSubmit={handleCommentSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '22px' }}>
                         <input
                             type="text"
-                            placeholder={`${currentNickname}님, 관람평이나 기대평을 남겨주세요...`}
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
+                            value={commentInput}
+                            onChange={(e) => setCommentInput(e.target.value)}
+                            placeholder={`${userNickname}님, 관람평이나 기대평을 남겨주세요...`}
                             style={{
-                                flex: 1, padding: '12px 16px', backgroundColor: '#0d0e12',
-                                color: '#ffffff', border: '1px solid #2a2d3d', borderRadius: '8px', fontSize: '0.92rem', outline: 'none'
+                                flex: 1,
+                                padding: '13px 16px',
+                                backgroundColor: '#0d0e12',
+                                color: '#ffffff',
+                                border: '1px solid #2a2d3d',
+                                borderRadius: '8px',
+                                fontSize: '0.95rem',
+                                outline: 'none'
                             }}
                         />
                         <button
                             type="submit"
                             style={{
-                                padding: '12px 20px', backgroundColor: '#232636', color: '#818cf8',
-                                border: '1px solid #2a2d3d', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
+                                padding: '13px 22px',
+                                backgroundColor: '#252a40',
+                                color: '#818cf8',
+                                border: '1px solid #363d5e',
+                                borderRadius: '8px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
                             }}
                         >
                             등록
                         </button>
                     </form>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {comments.map((comment) => (
-                            <div key={comment.id} style={{ padding: '16px', backgroundColor: '#111319', border: '1px solid #2a2d3d', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {comments.map((c) => (
+                            <div key={c.id} style={{ backgroundColor: '#0d0e12', border: '1px solid #222533', borderRadius: '8px', padding: '16px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                    <strong style={{ fontSize: '0.9rem', color: '#818cf8' }}>{comment.author}</strong>
-                                    <span style={{ fontSize: '0.78rem', color: '#71717a' }}>{comment.createdAt}</span>
+                                    <span style={{ color: '#818cf8', fontWeight: 'bold', fontSize: '0.88rem' }}>{c.author}</span>
+                                    <span style={{ color: '#71717a', fontSize: '0.8rem' }}>{c.date}</span>
                                 </div>
-                                <p style={{ margin: 0, fontSize: '0.9rem', color: '#d4d4d8', lineHeight: 1.4 }}>{comment.content}</p>
+                                <p style={{ margin: 0, color: '#e4e4e7', fontSize: '0.92rem' }}>{c.content}</p>
                             </div>
                         ))}
                     </div>
-                </section>
+                </div>
             </main>
 
             <Footer />

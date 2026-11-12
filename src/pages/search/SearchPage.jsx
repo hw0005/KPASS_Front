@@ -16,57 +16,62 @@ export default function SearchPage() {
     // 데이터 및 화면 상태
     const [performances, setPerformances] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [isSearchMode, setIsSearchMode] = useState(false);
 
     // 페이징 메타데이터 상태
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
 
-    // 데이터 로딩 함수
-    const fetchPerformances = async (currentPage) => {
+    // ⭕ 데이터 로딩 함수 (비동기 state 오차 방지를 위해 파라미터 직접 전달 수용)
+    const fetchPerformances = async (targetPage = page, targetCategory = category, targetKeyword = keyword) => {
         setLoading(true);
         try {
-            let res;
-            if (isSearchMode) {
-                res = await performanceApi.searchPerformances(keyword, category, currentPage);
-            } else {
-                res = await performanceApi.getClosingSoonPerformances(currentPage);
-            }
+            const res = await performanceApi.searchPerformances(targetKeyword, targetCategory, targetPage);
 
-            console.log("API 응답 데이터:", res);
+            console.log("🔍 API 응답 데이터:", res);
 
-            // ⭕ res에서 직접 DTO 필드 추출
-            const list = res?.getAllDataListBySearchPage || [];
+            // 응답 DTO 필드 안전 추출
+            const dataObj = res?.getAllDataListBySearchPage ? res : (res?.data || res || {});
+            const list = dataObj?.getAllDataListBySearchPage || [];
 
             setPerformances(list);
-            setTotalPages(res?.totalPages || 0);
-            setTotalElements(res?.totalElements || 0);
+            setTotalPages(dataObj?.totalPages || 0);
+            setTotalElements(dataObj?.totalElements || 0); // ⭕ 총 개수 반영
         } catch (error) {
             console.error('공연 목록 조회 실패:', error);
             setPerformances([]);
+            setTotalPages(0);
+            setTotalElements(0);
         } finally {
             setLoading(false);
         }
     };
 
+    // ⭕ page 변경 시 자동 조회
     useEffect(() => {
-        fetchPerformances(page);
-    }, [page, isSearchMode]);
+        fetchPerformances(page, category, keyword);
+    }, [page]);
 
-    // 검색 버튼 클릭
-    const handleSearchSubmit = (e) => {
-        if (e) e.preventDefault();
-        setIsSearchMode(true);
-        setPage(0);
+    // ⭕ 카테고리 드롭다운 변경 즉시 필터링 적용
+    const handleCategoryChange = (e) => {
+        const selectedCategory = e.target.value;
+        setCategory(selectedCategory);
+        setPage(0); // 1페이지(인덱스 0)로 리셋
+        fetchPerformances(0, selectedCategory, keyword); // 최신 선택값으로 즉시 요청
     };
 
-    // 상태 판별 헬퍼
+    // ⭕ 검색 버튼 클릭 / 엔터 입력시 실행
+    const handleSearchSubmit = (e) => {
+        if (e) e.preventDefault();
+        setPage(0);
+        fetchPerformances(0, category, keyword);
+    };
+
+    // 공연 마감 여부 체크 헬퍼
     const getStatusInfo = (item) => {
         if (!item) return { label: '진행중', bgColor: '#ff3355', textColor: '#ffffff', borderColor: 'transparent', isClosed: false };
 
         const today = new Date().toISOString().split('T')[0];
-        // endDate가 오늘 이전이거나 잔여 수량이 0 이하면 마감
         const isClosed = (item.endDate && item.endDate < today) || (item.stockQuantity !== undefined && item.stockQuantity <= 0);
 
         if (isClosed) {
@@ -88,12 +93,12 @@ export default function SearchPage() {
                     🔍 K-PASS 공연 검색
                 </h2>
 
-                {/* 검색 필터 */}
+                {/* 검색 필터 Form */}
                 <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
                     <select
                         value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        style={{ padding: '14px 16px', backgroundColor: '#161820', color: '#ffffff', border: '1px solid #2a2d3d', borderRadius: '8px', fontSize: '0.95rem', outline: 'none' }}
+                        onChange={handleCategoryChange}
+                        style={{ padding: '14px 16px', backgroundColor: '#161820', color: '#ffffff', border: '1px solid #2a2d3d', borderRadius: '8px', fontSize: '0.95rem', outline: 'none', cursor: 'pointer' }}
                     >
                         <option value="ALL">전체 장르</option>
                         <option value="CONCERT">콘서트 (대중음악)</option>
@@ -120,17 +125,17 @@ export default function SearchPage() {
                     </button>
                 </form>
 
-                {/* 타이틀 및 전체 개수 */}
+                {/* 타이틀 및 필터링된 총 개수 */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#a1a1aa' }}>
-                        {isSearchMode ? '🔍 검색 결과' : '🔥 마감 임박 공연'}
+                        {category !== 'ALL' || keyword !== '' ? '🔍 검색 결과' : '🔥 전체 공연'}
                     </span>
                     <span style={{ fontSize: '0.9rem', color: '#818cf8' }}>
-                        총 <strong style={{ color: '#ff3355' }}>{totalElements}</strong>건의 공연
+                        총 <strong style={{ color: '#ff3355' }}>{totalElements.toLocaleString()}</strong>건의 공연
                     </span>
                 </div>
 
-                {/* 공연 카드 목록 */}
+                {/* 공연 카드 목록 그리드 */}
                 {loading ? (
                     <div style={{ textAlign: 'center', padding: '80px 0', color: '#818cf8', fontSize: '1.1rem' }}>공연 정보를 불러오는 중입니다...</div>
                 ) : !performances || performances.length === 0 ? (
@@ -170,14 +175,13 @@ export default function SearchPage() {
                     </div>
                 )}
 
-                {/* 페이지네이션 버튼 */}
+                {/* 10개 블록 단위 페이지네이션 */}
                 {totalPages > 1 && (() => {
-                    const PAGE_GROUP_SIZE = 10; // 한 번에 보여줄 페이지 버튼 개수
-                    const currentGroup = Math.floor(page / PAGE_GROUP_SIZE); // 현재 페이지가 속한 그룹 (0그룹: 0~9, 1그룹: 10~19 ...)
+                    const PAGE_GROUP_SIZE = 10;
+                    const currentGroup = Math.floor(page / PAGE_GROUP_SIZE);
                     const startPage = currentGroup * PAGE_GROUP_SIZE;
                     const endPage = Math.min(startPage + PAGE_GROUP_SIZE - 1, totalPages - 1);
 
-                    // 현재 그룹에 표시할 페이지 번호 배열 생성
                     const pageNumbers = [];
                     for (let i = startPage; i <= endPage; i++) {
                         pageNumbers.push(i);
@@ -202,15 +206,11 @@ export default function SearchPage() {
 
                     return (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginTop: '40px' }}>
-
-                            {/* 현재 페이지 위치 안내 텍스트 (1. 현재 페이지 식별 보완) */}
                             <span style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>
                                 <strong style={{ color: '#ff3355' }}>{page + 1}</strong> / {totalPages} 페이지
                             </span>
 
                             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-
-                                {/* 2 & 3. 맨 처음 페이지로 이동 (<<) */}
                                 <button
                                     disabled={page === 0}
                                     onClick={() => setPage(0)}
@@ -220,7 +220,6 @@ export default function SearchPage() {
                                     «
                                 </button>
 
-                                {/* 3. 10페이지 이전으로 이동 (<) */}
                                 <button
                                     disabled={page === 0}
                                     onClick={() => setPage(Math.max(0, page - 10))}
@@ -230,7 +229,6 @@ export default function SearchPage() {
                                     ‹
                                 </button>
 
-                                {/* 1. 현재 블록의 10개 페이지 번호 버튼 */}
                                 {pageNumbers.map((pageNum) => {
                                     const isCurrentPage = page === pageNum;
                                     return (
@@ -239,7 +237,6 @@ export default function SearchPage() {
                                             onClick={() => setPage(pageNum)}
                                             style={{
                                                 ...buttonStyle,
-                                                // 현재 보고 있는 페이지 강조 표시 (빨간 배경 + 두꺼운 글씨 + 그림자)
                                                 backgroundColor: isCurrentPage ? '#ff3355' : '#161820',
                                                 color: isCurrentPage ? '#ffffff' : '#a1a1aa',
                                                 borderColor: isCurrentPage ? '#ff3355' : '#2a2d3d',
@@ -253,7 +250,6 @@ export default function SearchPage() {
                                     );
                                 })}
 
-                                {/* 3. 10페이지 다음으로 이동 (>) */}
                                 <button
                                     disabled={page >= totalPages - 1}
                                     onClick={() => setPage(Math.min(totalPages - 1, page + 10))}
@@ -263,7 +259,6 @@ export default function SearchPage() {
                                     ›
                                 </button>
 
-                                {/* 2 & 3. 맨 끝 페이지로 이동 (>>) */}
                                 <button
                                     disabled={page >= totalPages - 1}
                                     onClick={() => setPage(totalPages - 1)}

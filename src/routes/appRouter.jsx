@@ -12,6 +12,7 @@ import MainPage from '../pages/main/MainPage';
 import PerformanceDetailPage from '../pages/performance/PerformanceDetailPage';
 import CheckoutPage from '../pages/checkout/CheckoutPage';
 import SearchPage from '../pages/search/SearchPage';
+import CartPage from '../pages/cart/CartPage';
 //-------------------------메인
 
 
@@ -38,6 +39,7 @@ const AppRouter = () => {
                 <Route path="/kpass/main" element={<MainPage />} />
                 <Route path="/kpass/detail" element={<PerformanceDetailPage />} />
                 <Route path="/kpass/checkout" element={<CheckoutPage />} />
+                <Route path="/kpass/cart" element={<CartPage />} />
             </Routes>
         </BrowserRouter>
     );
