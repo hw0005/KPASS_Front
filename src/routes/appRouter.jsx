@@ -11,6 +11,8 @@ import GoogleCallbackPage from '../pages/auth/GoogleCallbackPage';
 import MainPage from '../pages/main/MainPage';
 import PerformanceDetailPage from '../pages/performance/PerformanceDetailPage';
 import CheckoutPage from '../pages/checkout/CheckoutPage';
+import PaymentSuccessPage from '../pages/checkout/PaymentSuccessPage';
+import PaymentFailPage from '../pages/checkout/PaymentFailPage';
 import SearchPage from '../pages/search/SearchPage';
 import CartPage from '../pages/cart/CartPage';
 //-------------------------메인
@@ -40,6 +42,9 @@ const AppRouter = () => {
                 <Route path="/kpass/detail" element={<PerformanceDetailPage />} />
                 <Route path="/kpass/checkout" element={<CheckoutPage />} />
                 <Route path="/kpass/cart" element={<CartPage />} />
+
+                <Route path="/kpass/payment/success" element={<PaymentSuccessPage />} />
+                <Route path="/kpass/payment/fail" element={<PaymentFailPage />} />
             </Routes>
         </BrowserRouter>
     );

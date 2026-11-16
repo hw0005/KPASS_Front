@@ -93,17 +93,12 @@ export default function CartPage() {
     }, 0);
 
     const handleProceedCheckout = () => {
+        const selectedItems = cartItems.filter((item) => item.checked);
         if (selectedItems.length === 0) {
-            alert('예매할 공연을 선택해주세요.');
+            alert('결제할 공연을 선택해주세요.');
             return;
         }
-        navigate('/kpass/checkout', {
-            state: {
-                items: selectedItems,
-                totalTickets,
-                totalPrice
-            }
-        });
+        navigate('/kpass/checkout', { state: { cartItems: selectedItems } });
     };
 
     return (
