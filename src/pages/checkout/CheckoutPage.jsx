@@ -7,7 +7,7 @@ import CheckoutApi from './CheckoutApi';
 
 // 프론트엔드 루트(.env)에 VITE_TOSS_CLIENT_KEY 설정 권장
 const TOSS_CLIENT_KEY =
-    import.meta.env.VITE_TOSS_CLIENT_KEY || 'test_ck_여기에_토스_테스트_클라이언트키_입력';
+    import.meta.env.VITE_TOSS_CLIENT_KEY || 'test_ck_c19yMsX1ioSNn6RvjKEJt7XWzZwK94upvY';
 
 export default function CheckoutPage() {
     const location = useLocation();
@@ -61,7 +61,7 @@ export default function CheckoutPage() {
         ? [
             {
                 cartId: null,
-                performanceId: singleItem.id,
+                performanceId: singleItem.id ?? singleItem.performanceId ?? null,
                 seatPriceId: selectedSeat?.id || null,
                 title: singleItem.title,
                 posterUrl: singleItem.posterUrl,
@@ -72,8 +72,8 @@ export default function CheckoutPage() {
             },
         ]
         : cartItems.map((c) => ({
-            cartId: c.cartId ?? c.id ?? null,
-            performanceId: c.performanceId,
+            cartId: c.cartItemId ?? c.cartId ?? null,
+            performanceId: c.performanceId ?? c.id ?? null,
             seatPriceId: c.seatPriceId ?? null,
             title: c.title || c.performanceTitle,
             posterUrl: c.posterUrl,
@@ -113,18 +113,27 @@ export default function CheckoutPage() {
             // 최초 결제 클릭 시 백엔드에 주문 생성 및 5분 선점 요청
             if (!orderInfo) {
                 const payload = {
+                    memberCouponId: null,
                     items: displayItems.map((item) => ({
                         cartId: item.cartId,
                         performanceId: item.performanceId,
                         seatPriceId: item.seatPriceId,
                         seatType: item.seatType,
                         quantity: item.quantity,
-                        unitPrice: item.unitPrice,
                     })),
-                    totalAmount: totalPrice,
+                    totalPrice: totalPrice, // 백엔드 DTO 필드명(totalPrice)과 일치시킴
                 };
 
-                orderInfo = await CheckoutApi.createOrder(payload);
+                const res = await CheckoutApi.createOrder(payload);
+                const data = res?.data ?? res;
+
+                // 백엔드 응답(orderUid, totalPrice)을 프론트 상태 규격(orderId, totalAmount)에 맞춤
+                orderInfo = {
+                    orderId: data.orderUid,
+                    orderName: data.orderName,
+                    totalAmount: data.totalPrice,
+                    expiredAt: data.expiredAt,
+                };
                 setHeldOrder(orderInfo);
             }
 
@@ -137,10 +146,14 @@ export default function CheckoutPage() {
 
             await openTossPaymentWindow(orderInfo);
         } catch (error) {
+            console.error('결제 에러 상세:', error);
             if (error?.code === 'USER_CANCEL') {
                 alert('결제창을 닫았습니다. 남은 선점 시간 내에 다시 결제를 진행할 수 있습니다.');
             } else {
-                const msg = error.response?.data?.message || '주문 생성 또는 결제 요청 중 오류가 발생했습니다.';
+                const msg =
+                    error.response?.data?.message ||
+                    error?.message ||
+                    '주문 생성 또는 결제 요청 중 오류가 발생했습니다.';
                 alert(msg);
             }
         } finally {
