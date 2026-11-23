@@ -24,7 +24,7 @@ const Footer = () => {
                         <h4>내 서비스</h4>
                         <span onClick={() => navigate('/kpass/map')}>전국 공연장 지도</span>
                         <span onClick={() => navigate('/kpass/cart')}>찜한 공연 / 장바구니</span>
-                        <span onClick={() => navigate('/kpass/checkout')}>결제 / 예매 내역</span>
+                        <span onClick={() => navigate('/kpass/reservations')}>결제 / 예매 내역</span>
                     </div>
                 </div>
             </div>

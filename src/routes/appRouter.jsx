@@ -15,6 +15,7 @@ import PaymentSuccessPage from '../pages/checkout/PaymentSuccessPage';
 import PaymentFailPage from '../pages/checkout/PaymentFailPage';
 import SearchPage from '../pages/search/SearchPage';
 import CartPage from '../pages/cart/CartPage';
+import MyReservationsPage from '../pages/user/MyReservationsPage';
 //-------------------------메인
 
 
@@ -42,6 +43,10 @@ const AppRouter = () => {
                 <Route path="/kpass/detail" element={<PerformanceDetailPage />} />
                 <Route path="/kpass/checkout" element={<CheckoutPage />} />
                 <Route path="/kpass/cart" element={<CartPage />} />
+                <Route path="/kpass/reservations" element={<MyReservationsPage />} />
+
+
+
 
                 <Route path="/kpass/payment/success" element={<PaymentSuccessPage />} />
                 <Route path="/kpass/payment/fail" element={<PaymentFailPage />} />

@@ -80,6 +80,13 @@ export default function Header() {
                     >
                         🛒 장바구니
                     </button>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/kpass/reservations')}
+                        style={{ background: 'none', border: 'none', color: location.pathname === '/kpass/reservations' ? '#ff3355' : '#a1a1aa', fontSize: '0.95rem', fontWeight: 'bold', cursor: 'pointer' }}
+                    >
+                        🎫 예매내역
+                    </button>
                 </nav>
 
                 {/* 3. 회원 전용 영역 */}

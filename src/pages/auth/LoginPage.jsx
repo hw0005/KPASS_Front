@@ -40,18 +40,19 @@ const LoginPage = ({ onSwitchToRegister }) => {
             // ⭕ 백엔드/Axios 응답 래핑 구조 완벽 대응 추출
             const responseData = res?.data?.data || res?.data || res;
             const userNickname = responseData?.nickname;
-            const token = responseData?.accessToken || responseData?.token;
-
-            console.log('3. [추출된 닉네임]:', userNickname);
+            const accessToken = responseData?.accessToken || responseData?.token;
+            const refreshToken = responseData?.refreshToken;
 
             if (userNickname) {
                 localStorage.setItem('nickname', userNickname);
-            } else {
-                console.warn('⚠️ 백엔드 응답에서 nickname 항목을 찾지 못했습니다:', responseData);
             }
 
-            if (token) {
-                localStorage.setItem('token', token);
+            if (accessToken) {
+                localStorage.setItem('accessToken', accessToken);
+            }
+
+            if (refreshToken) {
+                localStorage.setItem('refreshToken', refreshToken);
             }
 
             alert(`${userNickname || '회원'}님 로그인에 성공했습니다!`);
