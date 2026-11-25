@@ -18,6 +18,9 @@ import CartPage from '../pages/cart/CartPage';
 import MyReservationsPage from '../pages/user/MyReservationsPage';
 //-------------------------메인
 
+//-- 지도
+import MapPage from '../components/map/MapPage';
+
 
 
 
@@ -45,8 +48,8 @@ const AppRouter = () => {
                 <Route path="/kpass/cart" element={<CartPage />} />
                 <Route path="/kpass/reservations" element={<MyReservationsPage />} />
 
-
-
+                {/* 지도 */}
+                <Route path="/kpass/map" element={<MapPage />} />
 
                 <Route path="/kpass/payment/success" element={<PaymentSuccessPage />} />
                 <Route path="/kpass/payment/fail" element={<PaymentFailPage />} />
