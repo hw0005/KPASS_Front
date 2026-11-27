@@ -43,7 +43,7 @@ const AppRouter = () => {
                 {/* 3. 메인 / 상세 / 결제 (URL ID 노출 없는 CGV 스타일) */}
                 <Route path="/kpass/search" element={<SearchPage />} />
                 <Route path="/kpass/main" element={<MainPage />} />
-                <Route path="/kpass/detail" element={<PerformanceDetailPage />} />
+                <Route path="/kpass/detail" element={<PerformanceDetailPage />} />0
                 <Route path="/kpass/checkout" element={<CheckoutPage />} />
                 <Route path="/kpass/cart" element={<CartPage />} />
                 <Route path="/kpass/reservations" element={<MyReservationsPage />} />

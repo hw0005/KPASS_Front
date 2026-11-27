@@ -1,0 +1,12 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #0d0e12;
+    color: #ffffff;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+}

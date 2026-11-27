@@ -76,6 +76,9 @@ export default function MainPage() {
     const [selectedRegion, setSelectedRegion] = useState('SEOUL');
     const [loading, setLoading] = useState(true);
     const [heroIndex, setHeroIndex] = useState(0);
+    // 🎁 선착순 쿠폰 상태
+    const [couponEvents, setCouponEvents] = useState([]);
+    const [issuingCode, setIssuingCode] = useState(null);
 
     const hotCarousel = useCarousel();
     const regionCarousel = useCarousel();
@@ -87,7 +90,7 @@ export default function MainPage() {
     };
 
     const handleGoCheckout = (performanceItem) => {
-        navigate('/kpass/checkout', { state: { performance: performanceItem } });
+        navigate('/kpass/detail', { state: { performance: performanceItem } });
     };
 
     useEffect(() => {
@@ -116,6 +119,20 @@ export default function MainPage() {
             setLoading(false);
         }
     };
+
+    // 진행 중인 선착순 쿠폰 조회 (POST)
+    const fetchCouponEvents = async () => {
+        try {
+            const res = await axiosClient.post('/api/v1/coupons/events');
+            const list = res?.data ?? res ?? [];
+            setCouponEvents(Array.isArray(list) ? list : []);
+        } catch (error) {
+            console.error('쿠폰 이벤트 조회 실패:', error);
+        }
+    };
+    useEffect(() => {
+        fetchCouponEvents();
+    }, []);
 
     useEffect(() => {
         fetchMainData(selectedRegion);
